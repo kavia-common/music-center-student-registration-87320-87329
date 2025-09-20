@@ -324,7 +324,15 @@ function App() {
         throw new Error(txt || 'Failed to fetch students');
       }
       const data = await res.json();
-      setStudents(Array.isArray(data) ? data : data.students || []);
+      // Backend returns { items: [...] }. Support multiple shapes defensively.
+      const items = Array.isArray(data)
+        ? data
+        : Array.isArray(data.items)
+        ? data.items
+        : Array.isArray(data.students)
+        ? data.students
+        : [];
+      setStudents(items);
     } catch (err) {
       setFeedback({ kind: 'error', message: `Could not load students: ${err.message}` });
     } finally {
