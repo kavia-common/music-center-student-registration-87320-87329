@@ -262,22 +262,37 @@ function App() {
 
     setSubmitting(true);
     try {
+      console.log('Submitting to:', `${apiBase}/api/students`);
       const res = await fetch(`${apiBase}/api/students`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 
+          'Content-Type': 'application/json',
+          'Accept': 'application/json'
+        },
         body: JSON.stringify({
-          student_name: form.student_name,
-          parent_name: form.parent_name,
+          full_name: form.student_name,
           email: form.email,
           phone: form.phone,
-          course: form.course,
-          grade: form.grade,
+          instrument: form.course,
+          experience_level: form.grade ? `Grade ${form.grade}` : 'Beginner'
         }),
       });
 
       if (!res.ok) {
-        const txt = await res.text();
-        throw new Error(txt || 'Failed to submit');
+        const contentType = res.headers.get('content-type');
+        let errorMessage;
+        if (contentType && contentType.includes('application/json')) {
+          const errorData = await res.json();
+          errorMessage = errorData.message || errorData.error || JSON.stringify(errorData);
+        } else {
+          errorMessage = await res.text();
+        }
+        console.error('API Error:', {
+          status: res.status,
+          statusText: res.statusText,
+          error: errorMessage
+        });
+        throw new Error(errorMessage || `Server error: ${res.status}`);
       }
 
       setFeedback({ kind: 'success', message: 'Registration successful! We will contact you soon.' });
