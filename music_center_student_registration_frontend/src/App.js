@@ -205,12 +205,12 @@ function App() {
   }, []);
 
   const [form, setForm] = useState({
-    first_name: '',
-    last_name: '',
+    student_name: '',
+    parent_name: '',
     email: '',
     phone: '',
-    instrument: '',
-    experience_years: '',
+    course: '',
+    grade: '',
   });
   const [submitting, setSubmitting] = useState(false);
   const [feedback, setFeedback] = useState({ kind: '', message: '' });
@@ -227,7 +227,8 @@ function App() {
   const [students, setStudents] = useState([]);
   const [loadingStudents, setLoadingStudents] = useState(false);
 
-  const instruments = ['Piano', 'Guitar', 'Violin', 'Drums', 'Voice', 'Flute', 'Saxophone', 'Cello'];
+  const courses = ['Children Piano', 'Adult Piano', 'Others'];
+  const grades = Array.from({ length: 12 }, (_, i) => (i + 1).toString());
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -237,7 +238,7 @@ function App() {
   const apiBase = getApiBase();
 
   const validate = () => {
-    if (!form.first_name || !form.last_name || !form.email || !form.instrument) {
+    if (!form.student_name || !form.email || !form.course) {
       setFeedback({ kind: 'error', message: 'Please fill in all required fields.' });
       return false;
     }
@@ -265,12 +266,12 @@ function App() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          first_name: form.first_name,
-          last_name: form.last_name,
+          student_name: form.student_name,
+          parent_name: form.parent_name,
           email: form.email,
           phone: form.phone,
-          instrument: form.instrument,
-          experience_years: form.experience_years ? Number(form.experience_years) : null,
+          course: form.course,
+          grade: form.grade,
         }),
       });
 
@@ -281,12 +282,12 @@ function App() {
 
       setFeedback({ kind: 'success', message: 'Registration successful! We will contact you soon.' });
       setForm({
-        first_name: '',
-        last_name: '',
+        student_name: '',
+        parent_name: '',
         email: '',
         phone: '',
-        instrument: '',
-        experience_years: '',
+        course: '',
+        grade: '',
       });
       if (isAdmin) {
         // refresh list if admin is viewing
@@ -381,30 +382,21 @@ function App() {
           }}
         >
           <form onSubmit={submitForm} noValidate>
-            <div
-              style={{
-                display: 'grid',
-                gridTemplateColumns: '1fr 1fr',
-                gap: 16,
-              }}
-            >
-              <Field
-                label="First Name"
-                name="first_name"
-                required
-                value={form.first_name}
-                onChange={handleChange}
-                placeholder="e.g., Alex"
-              />
-              <Field
-                label="Last Name"
-                name="last_name"
-                required
-                value={form.last_name}
-                onChange={handleChange}
-                placeholder="e.g., Rivera"
-              />
-            </div>
+            <Field
+              label="Student Name"
+              name="student_name"
+              required
+              value={form.student_name}
+              onChange={handleChange}
+              placeholder="e.g., Alex Rivera"
+            />
+            <Field
+              label="Parent Name"
+              name="parent_name"
+              value={form.parent_name}
+              onChange={handleChange}
+              placeholder="e.g., Jane Rivera"
+            />
             <div
               style={{
                 display: 'grid',
@@ -438,20 +430,19 @@ function App() {
               }}
             >
               <Select
-                label="Instrument"
-                name="instrument"
+                label="Course"
+                name="course"
                 required
-                value={form.instrument}
+                value={form.course}
                 onChange={handleChange}
-                options={instruments}
+                options={courses}
               />
-              <Field
-                label="Experience (years)"
-                name="experience_years"
-                type="number"
-                value={form.experience_years}
+              <Select
+                label="Grade"
+                name="grade"
+                value={form.grade}
                 onChange={handleChange}
-                placeholder="0"
+                options={grades}
               />
             </div>
 
@@ -501,7 +492,7 @@ function App() {
               <table style={{ width: '100%', borderCollapse: 'separate', borderSpacing: 0 }}>
                 <thead>
                   <tr style={{ background: '#f3f4f6' }}>
-                    {['First Name', 'Last Name', 'Email', 'Phone', 'Instrument', 'Experience'].map((h) => (
+                    {['Student Name', 'Parent Name', 'Email', 'Phone', 'Course', 'Grade'].map((h) => (
                       <th
                         key={h}
                         style={{
@@ -533,14 +524,12 @@ function App() {
                   ) : (
                     students.map((s, idx) => (
                       <tr key={`${s.id || s.email || idx}`} style={{ background: idx % 2 ? '#ffffff' : '#fafafa' }}>
-                        <td style={{ padding: '10px 12px', borderBottom: '1px solid #f1f5f9' }}>{s.first_name}</td>
-                        <td style={{ padding: '10px 12px', borderBottom: '1px solid #f1f5f9' }}>{s.last_name}</td>
+                        <td style={{ padding: '10px 12px', borderBottom: '1px solid #f1f5f9' }}>{s.student_name}</td>
+                        <td style={{ padding: '10px 12px', borderBottom: '1px solid #f1f5f9' }}>{s.parent_name}</td>
                         <td style={{ padding: '10px 12px', borderBottom: '1px solid #f1f5f9' }}>{s.email}</td>
                         <td style={{ padding: '10px 12px', borderBottom: '1px solid #f1f5f9' }}>{s.phone}</td>
-                        <td style={{ padding: '10px 12px', borderBottom: '1px solid #f1f5f9' }}>{s.instrument}</td>
-                        <td style={{ padding: '10px 12px', borderBottom: '1px solid #f1f5f9' }}>
-                          {s.experience_years ?? s.experience ?? ''}
-                        </td>
+                        <td style={{ padding: '10px 12px', borderBottom: '1px solid #f1f5f9' }}>{s.course}</td>
+                        <td style={{ padding: '10px 12px', borderBottom: '1px solid #f1f5f9' }}>{s.grade || ''}</td>
                       </tr>
                     ))
                   )}
